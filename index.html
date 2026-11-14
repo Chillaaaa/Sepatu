@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffffff">
+  <title>Mystery Card - Kasus Sepatu</title>
+
+  <style>
+    :root {
+      --blue: #0044cc;
+      --blue-dark: #002f91;
+      --green: #166534;
+      --text: #111827;
+      --muted: #374151;
+      --background: #ffffff;
+      --soft: #f1f5f9;
+      --border: #64748b;
+      --focus: #facc15;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      min-height: 100vh;
+      background: var(--background);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+    }
+
+    main {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      margin: 0 0 6px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--blue);
+      font-size: clamp(2rem, 6vw, 2.7rem);
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .player {
+      padding: 28px 20px;
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      background: var(--soft);
+      text-align: center;
+    }
+
+    .status {
+      min-height: 28px;
+      margin: 0 0 18px;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .status.playing { color: var(--green); }
+    .status.error { color: #991b1b; }
+
+    button, select { font-family: inherit; cursor: pointer; }
+
+    button {
+      min-height: 54px;
+      padding: 12px 22px;
+      border: 2px solid var(--blue);
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    button:focus-visible, select:focus-visible {
+      outline: 5px solid var(--focus);
+      outline-offset: 4px;
+    }
+
+    button:disabled, select:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .play-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      max-width: 340px;
+      min-height: 82px;
+      margin: 0 auto;
+      background: var(--blue);
+      color: #ffffff;
+      font-size: 1.5rem;
+    }
+
+    .play-button:hover:not(:disabled) { background: var(--blue-dark); }
+
+    .play-button.playing {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .play-icon { font-size: 1.5rem; }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .secondary-button {
+      min-width: 130px;
+      background: #ffffff;
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .secondary-button:hover:not(:disabled) { background: #e2e8f0; }
+
+    .speed-control {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 22px;
+      width: 100%;
+    }
+
+    .speed-control label {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .speed-control select {
+      width: 100%;
+      max-width: 340px;
+      min-height: 54px;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--text);
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .case-section { margin-top: 30px; }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 1.35rem;
+    }
+
+    .case-content {
+      padding: 22px;
+      border: 2px solid var(--border);
+      border-left: 7px solid var(--blue);
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    .case-content p {
+      margin: 0 0 16px;
+      font-size: 1.15rem;
+      overflow-wrap: anywhere;
+    }
+
+    .case-content p:last-child { margin-bottom: 0; }
+    .question { font-weight: 800; }
+
+    .instruction {
+      margin-top: 24px;
+      padding: 18px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--soft);
+      text-align: center;
+    }
+
+    .instruction p {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 18px 12px; }
+      .player { padding: 24px 14px; }
+      .controls { flex-direction: column; }
+      .secondary-button { width: 100%; }
+      .case-content { padding: 18px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header>
+      <p class="brand">MYSTERY CARD</p>
+      <h1>Kasus Sepatu</h1>
+    </header>
+
+    <section class="player" aria-label="Pemutar audio kasus">
+      <p id="audio-status" class="status" role="status" aria-live="polite">
+        Memuat audio...
+      </p>
+
+      <audio id="audio-player" src="./Sepatu.mp3" preload="metadata">
+        Browser kamu tidak mendukung pemutar audio.
+      </audio>
+
+      <button type="button" id="play-button" class="play-button" disabled>
+        <span class="play-icon" aria-hidden="true">▶</span>
+        <span id="play-label">Putar Audio</span>
+      </button>
+
+      <div class="controls">
+        <button type="button" id="pause-button" class="secondary-button" disabled>
+          ⏸ Jeda
+        </button>
+        <button type="button" id="restart-button" class="secondary-button" disabled>
+          ↻ Ulangi
+        </button>
+      </div>
+
+      <div class="speed-control">
+        <label for="speed-select">Kecepatan Audio</label>
+        <select id="speed-select" disabled>
+          <option value="0.5">0,5x - Sangat Lambat</option>
+          <option value="0.75">0,75x - Lambat</option>
+          <option value="1" selected>1x - Normal</option>
+          <option value="1.25">1,25x - Cepat</option>
+          <option value="1.5">1,5x - Lebih Cepat</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="case-section" aria-labelledby="case-heading">
+      <h2 id="case-heading">Teks Kasus</h2>
+      <div class="case-content">
+        <p>Dengarkan kasus berikut. Analisis secara mandiri tanpa menyampaikan jawaban.</p>
+        <p>Sebuah toko sepatu memberikan potongan harga dari Rp200.000 menjadi Rp150.000. Banyak pembeli tertarik membeli sepatu tersebut karena harganya lebih murah.</p>
+        <p class="question">Berdasarkan peristiwa tersebut, termasuk hukum apa?</p>
+      </div>
+    </section>
+
+    <section class="instruction" aria-label="Instruksi menjawab">
+      <p>
+        Tunggu aba-aba guru. Angkat tangan kanan untuk
+        permintaan atau tangan kiri untuk penawaran.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const audio = document.getElementById("audio-player");
+      const playButton = document.getElementById("play-button");
+      const pauseButton = document.getElementById("pause-button");
+      const restartButton = document.getElementById("restart-button");
+      const playLabel = document.getElementById("play-label");
+      const speedSelect = document.getElementById("speed-select");
+      const status = document.getElementById("audio-status");
+
+      let audioReady = false;
+
+      function setStatus(message, type = "") {
+        status.textContent = message;
+        status.className = "status" + (type ? " " + type : "");
+      }
+
+      function setReadyState() {
+        audioReady = true;
+        playButton.disabled = false;
+        pauseButton.disabled = true;
+        restartButton.disabled = false;
+        speedSelect.disabled = false;
+        playButton.classList.remove("playing");
+        playLabel.textContent = "Putar Audio";
+        setStatus("Siap diputar.");
+      }
+
+      function setPlayingState() {
+        playButton.classList.add("playing");
+        playButton.disabled = true;
+        pauseButton.disabled = false;
+        restartButton.disabled = false;
+        playLabel.textContent = "Sedang Diputar";
+        setStatus("Audio sedang diputar.", "playing");
+      }
+
+      function setPausedState() {
+        playButton.classList.remove("playing");
+        playButton.disabled = false;
+        pauseButton.disabled = true;
+        restartButton.disabled = false;
+        playLabel.textContent = "Lanjutkan";
+        setStatus("Audio dijeda.");
+      }
+
+      function setErrorState(message) {
+        audioReady = false;
+        playButton.disabled = false;
+        pauseButton.disabled = true;
+        restartButton.disabled = true;
+        speedSelect.disabled = true;
+        playButton.classList.remove("playing");
+        playLabel.textContent = "Coba Lagi";
+        setStatus(message, "error");
+      }
+
+      audio.addEventListener("canplay", setReadyState);
+
+      audio.addEventListener("error", () => {
+        setErrorState(
+          "Audio gagal dimuat. Periksa nama file dan lokasi audio."
+        );
+      });
+
+      audio.addEventListener("playing", setPlayingState);
+
+      audio.addEventListener("pause", () => {
+        if (!audio.ended && audioReady) setPausedState();
+      });
+
+      audio.addEventListener("ended", () => {
+        playButton.classList.remove("playing");
+        playButton.disabled = false;
+        pauseButton.disabled = true;
+        restartButton.disabled = false;
+        playLabel.textContent = "Putar Lagi";
+        setStatus("Audio selesai diputar.");
+      });
+
+      async function playAudio(fromStart = false) {
+        if (fromStart) audio.currentTime = 0;
+
+        try {
+          await audio.play();
+        } catch (error) {
+          setStatus("Audio tidak dapat diputar. Silakan coba kembali.", "error");
+          playButton.disabled = false;
+          playLabel.textContent = "Coba Lagi";
+        }
+      }
+
+      playButton.addEventListener("click", () => {
+        if (audio.error) {
+          audio.load();
+          setStatus("Mencoba memuat audio kembali.");
+          return;
+        }
+        playAudio();
+      });
+
+      pauseButton.addEventListener("click", () => audio.pause());
+
+      restartButton.addEventListener("click", () => playAudio(true));
+
+      speedSelect.addEventListener("change", () => {
+        audio.playbackRate = Number(speedSelect.value);
+      });
+
+      audio.load();
+    });
+  </script>
+</body>
+</html>
