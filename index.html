@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Mystery Card - Kasus Sepatu</title>
+  <style>
+    :root {
+      font-family: Arial, Helvetica, sans-serif;
+      color: #172033;
+      background: #f3f6fb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px 16px;
+      line-height: 1.6;
+    }
+    main {
+      width: min(100%, 760px);
+      margin: 0 auto;
+    }
+    header { text-align: center; margin-bottom: 24px; }
+    .eyebrow {
+      margin: 0 0 6px;
+      color: #344054;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+    h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.5rem); line-height: 1.2; }
+    .card {
+      background: #fff;
+      border: 2px solid #d0d5dd;
+      border-radius: 18px;
+      padding: clamp(20px, 5vw, 32px);
+      box-shadow: 0 5px 18px rgba(16, 24, 40, .07);
+    }
+    h2 { margin: 0 0 16px; font-size: 1.35rem; }
+    .audio-area { text-align: center; }
+    .audio-help { margin: 0 auto 18px; max-width: 520px; color: #344054; }
+    button, select { font: inherit; }
+    button {
+      min-height: 54px;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:focus-visible, select:focus-visible {
+      outline: 4px solid #fdb022;
+      outline-offset: 3px;
+    }
+    .toggle-button {
+      display: block;
+      width: min(100%, 420px);
+      min-height: 76px;
+      margin: 0 auto 12px;
+      background: #155eef;
+      color: #fff;
+      font-size: 1.35rem;
+    }
+    .toggle-button:hover { background: #004eeb; }
+    .secondary-button {
+      background: #344054;
+      color: #fff;
+      min-width: 150px;
+    }
+    .secondary-button:hover { background: #1d2939; }
+    button:disabled {
+      background: #667085;
+      color: #fff;
+      cursor: not-allowed;
+      opacity: .75;
+    }
+    .status {
+      min-height: 28px;
+      margin: 12px 0 0;
+      color: #344054;
+      font-weight: 600;
+    }
+    .speed-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    label { font-weight: 700; }
+    select {
+      min-height: 46px;
+      border: 2px solid #667085;
+      border-radius: 9px;
+      background: #fff;
+      color: #172033;
+      padding: 8px 12px;
+    }
+    .transcript { margin-top: 22px; }
+    .transcript p { margin: 0 0 14px; }
+    .instruction {
+      margin-top: 20px;
+      padding: 16px;
+      border-left: 5px solid #155eef;
+      background: #eef4ff;
+      border-radius: 8px;
+    }
+    .instruction p { margin: 0; }
+    @media (max-width: 420px) {
+      body { padding: 18px 12px; }
+      .card { border-radius: 14px; }
+      .toggle-button { min-height: 70px; }
+      .secondary-button { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">MYSTERY CARD</p>
+      <h1>Kasus Sepatu</h1>
+    </header>
+
+    <section class="card audio-area" aria-labelledby="audio-heading">
+      <h2 id="audio-heading">Dengarkan Kasus</h2>
+      <p class="audio-help">Tekan tombol besar untuk memutar audio. Tekan kembali saat audio berjalan untuk menjedanya, lalu tekan lagi untuk melanjutkan.</p>
+
+      <audio id="caseAudio" preload="metadata">
+        <source src="./Sepatu.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung pemutar audio.
+      </audio>
+
+      <button id="toggleButton" class="toggle-button" type="button"
+        aria-label="Putar audio" aria-pressed="false">
+        <span id="toggleIcon" aria-hidden="true">▶</span>
+        <span id="toggleText">Putar</span>
+      </button>
+
+      <button id="replayButton" class="secondary-button" type="button">
+        <span aria-hidden="true">↻</span> Ulangi dari awal
+      </button>
+
+      <p id="status" class="status" role="status" aria-live="polite">Audio siap diputar.</p>
+
+      <div class="speed-row">
+        <label for="speedSelect">Kecepatan audio</label>
+        <select id="speedSelect">
+          <option value="0.5">0,5 kali</option>
+          <option value="0.75">0,75 kali</option>
+          <option value="1" selected>Normal (1 kali)</option>
+          <option value="1.25">1,25 kali</option>
+          <option value="1.5">1,5 kali</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="card transcript" aria-labelledby="case-heading">
+      <h2 id="case-heading">Teks Kasus</h2>
+      <p>Sebuah toko sepatu memberikan potongan harga dari Rp200.000 menjadi Rp150.000. Banyak pembeli tertarik membeli sepatu tersebut karena harganya lebih murah.</p>
+      <p><strong>Berdasarkan peristiwa tersebut, termasuk hukum apa?</strong></p>
+    </section>
+
+    <aside class="instruction">
+      <p><strong>Petunjuk:</strong> Tunggu aba-aba guru. Setelah hitungan ketiga, angkat tangan kanan untuk permintaan atau tangan kiri untuk penawaran.</p>
+    </aside>
+  </main>
+
+  <script>
+    const audio = document.getElementById("caseAudio");
+    const toggleButton = document.getElementById("toggleButton");
+    const toggleText = document.getElementById("toggleText");
+    const toggleIcon = document.getElementById("toggleIcon");
+    const replayButton = document.getElementById("replayButton");
+    const speedSelect = document.getElementById("speedSelect");
+    const statusText = document.getElementById("status");
+
+    function setPausedView(message = "Audio dijeda. Tekan Lanjutkan untuk meneruskan.") {
+      toggleText.textContent = audio.currentTime > 0 && !audio.ended ? "Lanjutkan" : "Putar";
+      toggleIcon.textContent = "▶";
+      toggleButton.setAttribute("aria-label", audio.currentTime > 0 && !audio.ended ? "Lanjutkan audio" : "Putar audio");
+      toggleButton.setAttribute("aria-pressed", "false");
+      statusText.textContent = message;
+    }
+
+    async function playAudio() {
+      try {
+        await audio.play();
+      } catch (error) {
+        statusText.textContent = "Audio belum dapat diputar. Periksa koneksi atau pastikan file audio tersedia.";
+      }
+    }
+
+    toggleButton.addEventListener("click", () => {
+      if (audio.paused) {
+        if (audio.ended) audio.currentTime = 0;
+        playAudio();
+      } else {
+        audio.pause();
+      }
+    });
+
+    replayButton.addEventListener("click", () => {
+      audio.currentTime = 0;
+      playAudio();
+    });
+
+    speedSelect.addEventListener("change", () => {
+      audio.playbackRate = Number(speedSelect.value);
+      statusText.textContent = "Kecepatan audio diubah menjadi " + speedSelect.options[speedSelect.selectedIndex].text + ".";
+    });
+
+    audio.addEventListener("playing", () => {
+      toggleText.textContent = "Jeda";
+      toggleIcon.textContent = "Ⅱ";
+      toggleButton.setAttribute("aria-label", "Jeda audio");
+      toggleButton.setAttribute("aria-pressed", "true");
+      statusText.textContent = "Audio sedang diputar.";
+    });
+
+    audio.addEventListener("pause", () => {
+      if (!audio.ended) setPausedView();
+    });
+
+    audio.addEventListener("ended", () => {
+      audio.currentTime = 0;
+      setPausedView("Audio selesai. Tekan Putar untuk mendengarkan kembali.");
+    });
+
+    audio.addEventListener("error", () => {
+      statusText.textContent = "Gagal memuat audio. Pastikan file " + "Sepatu.mp3" + " berada di folder yang sama dengan file HTML ini.";
+    });
+  </script>
+</body>
+</html>
