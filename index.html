@@ -50,10 +50,72 @@
       font-weight: 700;
       cursor: pointer;
     }
-    button:focus-visible, select:focus-visible {
+    button:focus-visible, select:focus-visible, input[type="range"]:focus-visible {
       outline: 4px solid #fdb022;
       outline-offset: 3px;
     }
+
+    /* Progress Bar & Penanda Waktu */
+    .progress-wrapper {
+      width: min(100%, 520px);
+      margin: 0 auto 20px;
+    }
+    .time-indicator {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #172033;
+      font-variant-numeric: tabular-nums;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      min-height: 44px;
+      background: transparent;
+      cursor: pointer;
+      margin: 0;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 12px;
+      background: #d0d5dd;
+      border-radius: 6px;
+      border: 1px solid #667085;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 28px;
+      width: 28px;
+      border-radius: 50%;
+      background: #155eef;
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 0 2px #172033;
+      margin-top: -9px;
+    }
+    input[type="range"]::-moz-range-track {
+      width: 100%;
+      height: 12px;
+      background: #d0d5dd;
+      border-radius: 6px;
+      border: 1px solid #667085;
+    }
+    input[type="range"]::-moz-range-thumb {
+      height: 28px;
+      width: 28px;
+      border-radius: 50%;
+      background: #155eef;
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 0 2px #172033;
+    }
+    input[type="range"]:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     .toggle-button {
       display: block;
       width: min(100%, 420px);
@@ -136,6 +198,16 @@
         Browser Anda tidak mendukung pemutar audio.
       </audio>
 
+      <!-- Progress Bar & Penanda Waktu -->
+      <div class="progress-wrapper">
+        <div class="time-indicator">
+          <label for="progressBar">Posisi audio</label>
+          <span aria-label="Waktu pemutaran"><span id="currentTime">00:00</span> / <span id="totalDuration">00:00</span></span>
+        </div>
+        <input id="progressBar" type="range" min="0" max="100" value="0" step="0.1"
+          aria-label="Penggeser posisi waktu audio" aria-valuetext="00:00 dari 00:00" disabled>
+      </div>
+
       <button id="toggleButton" class="toggle-button" type="button"
         aria-label="Putar audio" aria-pressed="false">
         <span id="toggleIcon" aria-hidden="true">▶</span>
@@ -179,6 +251,26 @@
     const replayButton = document.getElementById("replayButton");
     const speedSelect = document.getElementById("speedSelect");
     const statusText = document.getElementById("status");
+    const progressBar = document.getElementById("progressBar");
+    const currentTimeEl = document.getElementById("currentTime");
+    const totalDurationEl = document.getElementById("totalDuration");
+
+    let isSeeking = false;
+
+    function formatTime(seconds) {
+      if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+    }
+
+    function updateTimeDisplay(current, duration) {
+      const currentStr = formatTime(current);
+      const totalStr = formatTime(duration);
+      currentTimeEl.textContent = currentStr;
+      totalDurationEl.textContent = totalStr;
+      progressBar.setAttribute("aria-valuetext", currentStr + " dari " + totalStr);
+    }
 
     function setPausedView(message = "Audio dijeda. Tekan Lanjutkan untuk meneruskan.") {
       toggleText.textContent = audio.currentTime > 0 && !audio.ended ? "Lanjutkan" : "Putar";
@@ -196,6 +288,29 @@
       }
     }
 
+    audio.addEventListener("loadedmetadata", () => {
+      progressBar.max = audio.duration;
+      progressBar.disabled = false;
+      updateTimeDisplay(0, audio.duration);
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (!isSeeking) {
+        progressBar.value = audio.currentTime;
+        updateTimeDisplay(audio.currentTime, audio.duration);
+      }
+    });
+
+    progressBar.addEventListener("input", () => {
+      isSeeking = true;
+      updateTimeDisplay(Number(progressBar.value), audio.duration);
+    });
+
+    progressBar.addEventListener("change", () => {
+      audio.currentTime = Number(progressBar.value);
+      isSeeking = false;
+    });
+
     toggleButton.addEventListener("click", () => {
       if (audio.paused) {
         if (audio.ended) audio.currentTime = 0;
@@ -207,6 +322,8 @@
 
     replayButton.addEventListener("click", () => {
       audio.currentTime = 0;
+      progressBar.value = 0;
+      updateTimeDisplay(0, audio.duration);
       playAudio();
     });
 
@@ -229,11 +346,14 @@
 
     audio.addEventListener("ended", () => {
       audio.currentTime = 0;
+      progressBar.value = 0;
+      updateTimeDisplay(0, audio.duration);
       setPausedView("Audio selesai. Tekan Putar untuk mendengarkan kembali.");
     });
 
     audio.addEventListener("error", () => {
-      statusText.textContent = "Gagal memuat audio. Pastikan file " + "Sepatu.mp3" + " berada di folder yang sama dengan file HTML ini.";
+      progressBar.disabled = true;
+      statusText.textContent = "Gagal memuat audio. Pastikan file Sepatu.mp3 berada di folder yang sama dengan file HTML ini.";
     });
   </script>
 </body>
